@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>三角比―直角三角形の辺の比</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:22px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#f8fafc;color:#172033}.app{max-width:980px;margin:auto;background:#fff;border:1px solid #dbe3ee;border-radius:18px;padding:20px;box-shadow:0 12px 30px rgba(15,23,42,.07)}h1{margin:0 0 8px;font-size:clamp(22px,3vw,30px)}p{line-height:1.7}.controls{padding:14px;background:#f1f5f9;border-radius:14px;margin:16px 0}.controls label{display:flex;justify-content:space-between;font-weight:700}.controls input{width:100%;margin-top:8px}.preset{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.preset button{padding:8px 12px;border:0;border-radius:9px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}.preset button:hover{background:#1d4ed8}.layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(290px,.9fr);gap:16px;align-items:start}canvas{display:block;width:100%;height:auto;border:1px solid #dbe3ee;border-radius:14px;background:#fff}.values{display:grid;gap:10px}.box{padding:12px;border-radius:12px;background:#f8fafc;border:1px solid #dbe3ee;line-height:1.65}.formula{font-size:18px;font-weight:800}.number{margin-top:5px;font-size:17px;font-weight:750}.exact-note{margin-top:4px;font-size:12px;color:#64748b}.opposite{color:#dc2626}.adjacent{color:#2563eb}.hypotenuse{color:#047857}.notice{padding:11px 12px;border-radius:11px;background:#eff6ff;color:#1e3a8a;line-height:1.7;font-size:13px}@media(max-width:760px){body{padding:10px}.app{padding:14px}.layout{grid-template-columns:1fr}.controls{margin-bottom:12px}}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>三角比は「直角三角形の辺の比」</h1>
+<p>角θに対して、どの辺が「対辺・隣辺・斜辺」になるかを確認しながら、sin・cos・tanを辺の比として捉えます。ここでは単位円は使いません。</p>
+<div class="controls">
+<label>角度 θ <span id="thetaText">35°</span></label>
+<input id="theta" type="range" min="0" max="90" step="1" value="35">
+<div class="preset"><button data-angle="0">0°</button><button data-angle="30">30°</button><button data-angle="45">45°</button><button data-angle="60">60°</button><button data-angle="90">90°</button></div>
+</div>
+<div class="layout">
+<canvas id="cv" width="680" height="500"></canvas>
+<div class="values">
+<div class="box"><div class="formula">sinθ = <span class="opposite">対辺</span> / <span class="hypotenuse">斜辺</span></div><div class="number" id="sinValue"></div></div>
+<div class="box"><div class="formula">cosθ = <span class="adjacent">隣辺</span> / <span class="hypotenuse">斜辺</span></div><div class="number" id="cosValue"></div></div>
+<div class="box"><div class="formula">tanθ = <span class="opposite">対辺</span> / <span class="adjacent">隣辺</span></div><div class="number" id="tanValue"></div></div>
+<div class="notice" id="exactGuide">30°・45°・60°などの代表角では、小数値と厳密値を併記します。</div>
+</div>
+</div>
+</div>
+<script>
+"use strict";
+const slider=document.getElementById("theta"),thetaText=document.getElementById("thetaText"),cv=document.getElementById("cv"),ctx=cv.getContext("2d"),sinValue=document.getElementById("sinValue"),cosValue=document.getElementById("cosValue"),tanValue=document.getElementById("tanValue"),exactGuide=document.getElementById("exactGuide");
+const exactTable={
+0:{sin:"0",cos:"1",tan:"0"},
+30:{sin:"1/2",cos:"√3/2",tan:"1/√3（= √3/3）"},
+45:{sin:"√2/2",cos:"√2/2",tan:"1"},
+60:{sin:"√3/2",cos:"1/2",tan:"√3"},
+90:{sin:"1",cos:"0",tan:"定義できません"}
+};
+function decimal(v){return Math.abs(v)<0.0005?"0":v.toFixed(3)}
+function withExact(value,exact){return exact===undefined?decimal(value):decimal(value)+" （= "+exact+"）"}
+function draw(){
+ const deg=Number(slider.value),rad=deg*Math.PI/180,HYP=300,adj=HYP*Math.cos(rad),opp=HYP*Math.sin(rad),exact=exactTable[deg];
+ thetaText.textContent=deg+"°";ctx.clearRect(0,0,cv.width,cv.height);const ax=85,ay=420,bx=ax+adj,by=ay,cx=bx,cy=ay-opp;ctx.lineCap="round";
+ ctx.strokeStyle="#2563eb";ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.stroke();ctx.strokeStyle="#dc2626";ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(cx,cy);ctx.stroke();ctx.strokeStyle="#047857";ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(cx,cy);ctx.stroke();
+ ctx.strokeStyle="#475569";ctx.lineWidth=2;const s=18;ctx.strokeRect(bx-s,by-s,s,s);ctx.beginPath();ctx.arc(ax,ay,46,-rad,0);ctx.stroke();ctx.fillStyle="#172033";ctx.font="bold 18px sans-serif";ctx.fillText("θ="+deg+"°",ax+50,ay-15);
+ ctx.font="bold 17px sans-serif";ctx.fillStyle="#2563eb";ctx.fillText("隣辺 "+adj.toFixed(1),Math.min(ax+adj/2-45,cv.width-150),ay+30);ctx.fillStyle="#dc2626";ctx.fillText("対辺 "+opp.toFixed(1),Math.min(bx+15,cv.width-140),Math.max(28,ay-opp/2));ctx.save();ctx.translate((ax+cx)/2,(ay+cy)/2);ctx.rotate(-rad);ctx.fillStyle="#047857";ctx.fillText("斜辺 "+HYP.toFixed(1),-45,-12);ctx.restore();ctx.fillStyle="#64748b";ctx.font="14px sans-serif";ctx.fillText("直角",Math.max(10,bx-55),by-25);
+ const si=Math.sin(rad),co=Math.cos(rad),tanUndefined=Math.abs(co)<1e-10,ta=tanUndefined?NaN:Math.tan(rad);
+ sinValue.textContent=decimal(opp)+" / "+HYP.toFixed(1)+" = "+withExact(si,exact?.sin);
+ cosValue.textContent=decimal(adj)+" / "+HYP.toFixed(1)+" = "+withExact(co,exact?.cos);
+ tanValue.textContent=tanUndefined?"隣辺が0なので定義できません":decimal(opp)+" / "+decimal(adj)+" = "+withExact(ta,exact?.tan);
+ exactGuide.textContent=exact?deg+"°は代表角です。根号・分数を使った厳密値と小数近似を対応させましょう。":"厳密値は0°・30°・45°・60°・90°で表示されます。";
+}
+slider.addEventListener("input",draw);document.querySelectorAll("[data-angle]").forEach(btn=>btn.addEventListener("click",()=>{slider.value=btn.dataset.angle;draw()}));draw();
+</script>
+</body>
+</html>

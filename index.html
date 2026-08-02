@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>動く数学教材工房・生徒版</title>
+<style>
+:root{--b:#f4f7fb;--p:#fff;--t:#172033;--m:#64748b;--l:#dbe3ee;--a:#2563eb;--as:#dbeafe;--g:#047857;--gs:#d1fae5;--r:16px}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--b);color:var(--t);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Yu Gothic",sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.top{padding:12px 20px;background:#fffffff2;border-bottom:1px solid var(--l);position:sticky;top:0;z-index:20;backdrop-filter:blur(10px)}
+.topin{max-width:1500px;margin:auto;display:flex;gap:15px;justify-content:space-between;align-items:center}
+.top h1{margin:0;font-size:24px}
+.top p{margin:3px 0 0;color:var(--m);font-size:12px}
+.actions{display:flex;gap:7px;flex-wrap:wrap}
+.btn{border:1px solid var(--l);background:#fff;color:var(--t);border-radius:10px;padding:8px 12px;font-weight:700}
+.btn:hover{background:#f8fafc}
+.btn.blue{background:var(--a);border-color:var(--a);color:#fff}
+.btn.green{background:var(--gs);border-color:#a7f3d0;color:var(--g)}
+.btn.red{color:#b91c1c;background:#fff7f7;border-color:#fecaca}
+.btn.sm{padding:7px 10px;font-size:12px}
+
+.layout{max-width:1500px;margin:auto;padding:12px;display:grid;grid-template-columns:285px minmax(0,1fr);gap:12px;transition:grid-template-columns .18s ease}
+.layout.side-collapsed{grid-template-columns:minmax(0,1fr)}
+.layout.side-collapsed .side{display:none}
+.side,.card{background:var(--p);border:1px solid var(--l);border-radius:var(--r);box-shadow:0 10px 26px #0f172a10}
+.side{padding:12px;height:calc(100dvh - 82px);position:sticky;top:70px;display:flex;flex-direction:column;gap:9px}
+.side input,.side select,input,select,textarea{width:100%;border:1px solid var(--l);border-radius:10px;padding:9px 10px;outline:none;background:#fff;color:var(--t)}
+textarea{resize:vertical;line-height:1.5}
+.side input:focus,.side select:focus,input:focus,select:focus,textarea:focus{border-color:#93c5fd;box-shadow:0 0 0 3px var(--as)}
+.count{color:var(--m);font-size:12px}
+.items{overflow:auto;display:flex;flex-direction:column;gap:8px}
+.item{text-align:left;border:1px solid var(--l);background:#fff;border-radius:12px;padding:10px}
+.item:hover{border-color:#93c5fd}
+.item.active{border-color:var(--a);background:#eff6ff}
+.ititle{font-weight:800;line-height:1.35}
+.tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.tag{font-size:11px;font-weight:700;padding:3px 7px;background:#eef2f7;color:#475569;border-radius:99px}
+.tag.b{background:var(--as);color:#1d4ed8}
+.tag.g{background:var(--gs);color:var(--g)}
+
+.main{display:grid;gap:9px;min-width:0}
+.library-toggle{display:inline-flex;align-items:center;justify-content:center;width:max-content;position:sticky;top:70px;z-index:12;box-shadow:0 5px 16px #0f172a12}
+.head{padding:11px 15px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.head h2{margin:3px 0 0;font-size:clamp(20px,2.2vw,27px)}
+.head .desc{display:none;margin:10px 0 0;color:var(--m);line-height:1.65;white-space:pre-wrap}
+.head.details-open .desc{display:block}
+.head-actions{display:flex;gap:6px;flex-shrink:0}
+.guide{display:none}
+
+.tabs{display:flex;gap:5px;padding:7px 8px 0;border-bottom:1px solid var(--l);overflow:auto}
+.tab{border:0;background:transparent;padding:8px 12px;font-weight:800;color:var(--m);white-space:nowrap}
+.tab.on{color:#1d4ed8;background:#eff6ff;border-radius:9px 9px 0 0}
+.panel{display:none;padding:10px}
+.panel.on{display:block}
+
+.runner-toolbar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;padding:8px;background:#fff;border:1px solid var(--l);border-radius:11px;position:sticky;top:70px;z-index:11;box-shadow:0 5px 16px #0f172a10}
+.runner-toolbar .spacer{flex:1}
+.scale-control{display:inline-flex;align-items:center;gap:6px;color:var(--m);font-size:12px;font-weight:700}
+.scale-control select{width:auto;padding:6px 8px}
+.runner-subtabs{display:flex;gap:5px;margin:8px 0;padding:5px;background:#f1f5f9;border-radius:11px;position:sticky;top:126px;z-index:10}
+.runner-subtab{flex:1;border:0;background:transparent;color:var(--m);border-radius:8px;padding:8px 12px;font-weight:800}
+.runner-subtab.on{background:#fff;color:#1d4ed8;box-shadow:0 2px 8px #0f172a12}
+
+.two{display:block}
+.runner-pane{display:none;min-width:0}
+.runner-pane.on{display:block}
+.sect{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px}
+.sect h3{margin:0;font-size:15px}
+.smallacts{display:flex;gap:6px;flex-wrap:wrap}
+
+#editor{display:block;height:calc(100dvh - 210px);min-height:500px;max-height:980px;font:13px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre;resize:none}
+.preview{height:calc(100dvh - 210px);min-height:500px;max-height:980px;border:1px solid var(--l);border-radius:12px;overflow:hidden;position:relative;background:#fff}
+#frame{display:block;width:100%;height:100%;border:0;transform-origin:top left;background:#fff;contain:layout paint;will-change:transform}
+.empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:var(--m);padding:25px;pointer-events:none;background:#fff}
+.status{margin-top:6px;color:var(--m);font-size:12px}
+.warn{margin-top:7px;background:#fef3c7;color:#92400e;border-radius:10px;padding:7px 10px;font-size:11px;line-height:1.45}
+
+.promptgrid{display:grid;grid-template-columns:1fr 300px;gap:13px}
+.box{border:1px solid var(--l);border-radius:12px;padding:12px;background:#f8fafc}
+.box h3{margin:0 0 8px;font-size:15px}
+.box label{display:flex;gap:7px;margin:7px 0;color:#475569;font-size:13px;line-height:1.4}
+.box input{width:auto;margin-top:3px}
+#problem,#request{min-height:120px}
+#prompt{min-height:420px;font:13px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#f8fafc}
+.toast{position:fixed;right:18px;bottom:18px;z-index:1200;background:#111827;color:#fff;padding:11px 15px;border-radius:11px;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none}
+.toast.show{opacity:1;transform:none}
+
+/* 実行画面をページ全体から切り離す集中表示 */
+body.runner-focus{overflow:hidden}
+body.runner-focus #p-run{display:flex!important;flex-direction:column;position:fixed;inset:7px;z-index:1000;background:#fff;border:1px solid var(--l);border-radius:15px;padding:9px;box-shadow:0 24px 70px #0f172a55}
+body.runner-focus #p-run .runner-toolbar{position:static;flex:0 0 auto}
+body.runner-focus #p-run .runner-subtabs{position:static;flex:0 0 auto;margin:7px 0}
+body.runner-focus #p-run .two{flex:1;min-height:0}
+body.runner-focus #p-run .runner-pane.on{height:100%;min-height:0}
+body.runner-focus #p-run .runner-pane[data-runner-pane="preview"].on,
+body.runner-focus #p-run .runner-pane[data-runner-pane="code"].on{display:flex;flex-direction:column}
+body.runner-focus #p-run .sect{flex:0 0 auto}
+body.runner-focus #p-run .preview,
+body.runner-focus #p-run #editor{flex:1;height:auto;min-height:0;max-height:none}
+body.runner-focus #p-run .warn{display:none}
+
+@media(max-width:1000px){
+  .promptgrid{grid-template-columns:1fr}
+  .layout{grid-template-columns:235px minmax(0,1fr)}
+  #editor,.preview{height:calc(100dvh - 205px);min-height:430px}
+}
+@media(max-width:730px){
+  .top{position:static;padding:10px 12px}
+  .top h1{font-size:21px}
+  .top p{display:none}
+  .layout{grid-template-columns:1fr;padding:8px}
+  .layout.side-collapsed{grid-template-columns:1fr}
+  .side{position:static;height:auto;max-height:72dvh}
+  .items{max-height:52dvh}
+  .library-toggle{width:100%;position:static}
+  .head{padding:9px 11px}
+  .head h2{font-size:20px}
+  .head-actions{align-self:center}
+  .runner-toolbar{top:7px}
+  .runner-toolbar .spacer{display:none}
+  .runner-toolbar .btn{flex:1;min-width:82px}
+  .scale-control{order:10;width:100%;justify-content:space-between}
+  .scale-control select{flex:1}
+  .runner-subtabs{top:74px}
+  #editor,.preview{height:calc(100dvh - 178px);min-height:380px}
+  .warn{display:none}
+}
+
+.source-status{display:inline-flex;align-items:center;padding:6px 9px;border-radius:999px;background:#eef2f7;color:#475569;font-size:12px;font-weight:700}
+.source-status.ok{background:#d1fae5;color:#047857}
+.source-status.error{background:#fee2e2;color:#b91c1c}
+.load-panel{max-width:1500px;margin:12px auto 0;padding:14px 16px;border:1px solid #fbbf24;border-radius:14px;background:#fffbeb;color:#78350f;display:flex;gap:14px;align-items:center;justify-content:space-between}
+.load-panel p{margin:5px 0 0;line-height:1.55;font-size:13px}
+@media(max-width:730px){.load-panel{margin:8px;align-items:stretch;flex-direction:column}.source-status{display:none}}
+</style>
+</head>
+<body>
+<header class="top"><div class="topin"><div><h1>動く数学教材工房</h1><p>教材は外部JSONと個別HTMLから読み込みます。選択時に自動実行されます。</p></div><div class="actions"><span class="source-status" id="sourceStatus">教材を読み込み中…</span><button class="btn sm" id="chooseFolderBtn" type="button" hidden>教材フォルダを選ぶ</button><input id="folderPicker" type="file" webkitdirectory multiple hidden></div></div></header>
+
+<section class="load-panel" id="loadPanel" hidden><div><strong id="loadTitle">教材を読み込めませんでした</strong><p id="loadMessage">このHTMLをダブルクリックで開いた場合は、下のボタンからこのプロジェクトフォルダ全体を選択してください。</p></div><button class="btn blue" id="loadFolderBtn" type="button">プロジェクトフォルダを選択</button></section>
+<div class="layout">
+<aside class="side"><input id="search" placeholder="教材を検索"><select id="courseF"><option value="">すべての科目</option><option>中学数学</option><option>数学I</option><option>数学A</option><option>数学II</option><option>数学B</option><option>数学C</option><option>数学III</option><option>その他</option></select><div class="count" id="count"></div><div class="items" id="items"></div></aside>
+
+<main class="main">
+<button class="btn library-toggle" id="libraryToggle" type="button">教材一覧を閉じる</button>
+<section class="card head" id="materialHead"><div><div class="tags" id="tags"></div><h2 id="title"></h2><p class="desc" id="desc"></p></div><div class="head-actions"><button class="btn sm" id="detailsToggle" type="button">教材説明を見る</button></div></section>
+<section class="card" id="workbenchCard">
+<div class="tabs"><button class="tab on" data-tab="run">改変・実行</button><button class="tab" data-tab="llm">LLM用プロンプト</button></div>
+
+<div class="panel on" id="p-run">
+<div class="runner-toolbar" aria-label="コード実行ツール">
+  <button class="btn sm blue" id="runBtn" type="button">実行</button>
+  <button class="btn sm red" id="stopBtn" type="button">停止</button>
+  <button class="btn sm green" id="focusBtn" type="button">集中表示</button>
+  <span class="spacer"></span>
+  <label class="scale-control" for="previewScale">教材の表示倍率
+    <select id="previewScale">
+      <option value="100">100%</option>
+      <option value="90">90%</option>
+      <option value="80" selected>80%</option>
+      <option value="70">70%</option>
+    </select>
+  </label>
+  <button class="btn sm" id="copyCode" type="button">コードをコピー</button>
+  <button class="btn sm" id="resetCode" type="button">元に戻す</button>
+  <button class="btn sm" id="saveHtml" type="button">HTML保存</button>
+</div>
+<div class="runner-subtabs" role="tablist" aria-label="コードと実行結果の切り替え">
+  <button class="runner-subtab" data-runner-tab="code" type="button" role="tab" aria-selected="false">コード</button>
+  <button class="runner-subtab on" data-runner-tab="preview" type="button" role="tab" aria-selected="true">実行結果</button>
+</div>
+<div class="two">
+  <div class="runner-pane" data-runner-pane="code">
+    <div class="sect"><h3>HTMLコード</h3></div>
+    <textarea id="editor" spellcheck="false"></textarea>
+    <div class="status" id="codeStatus"></div>
+  </div>
+  <div class="runner-pane on" data-runner-pane="preview">
+    <div class="sect"><h3>実行結果</h3></div>
+    <div class="preview"><div class="empty" id="empty">教材を読み込んでいます…</div><iframe id="frame" sandbox="allow-scripts" referrerpolicy="no-referrer" title="教材プレビュー"></iframe></div>
+    <div class="warn">sandboxと外部通信禁止のCSPを付けて実行します。無限ループなどでタブが重くなる可能性は残ります。</div>
+  </div>
+</div>
+</div>
+
+<div class="panel" id="p-llm">
+<div class="promptgrid"><div><div class="sect"><h3>生徒の問題・条件</h3></div><textarea id="problem" placeholder="例：y=x²-4x+5（0≦x≦5）の最大値・最小値を視覚化したい。"></textarea><div class="sect" style="margin-top:12px"><h3>改変してほしい内容</h3></div><textarea id="request" placeholder="例：頂点と定義域の両端を強調し、値を比較できるようにする。答えは最初から表示しない。"></textarea><div class="actions" style="margin-top:9px"><button class="btn blue" id="makePrompt">プロンプトを作る</button><button class="btn" id="copyPrompt">コピー</button></div></div>
+<div class="box"><h3>共通条件</h3><label><input type="checkbox" id="c1" checked>1ファイルHTMLだけで完結</label><label><input type="checkbox" id="c2" checked>外部ライブラリ・外部通信なし</label><label><input type="checkbox" id="c3" checked>表示と説明は日本語</label><label><input type="checkbox" id="c4" checked>PC・タブレットで見やすく</label><label><input type="checkbox" id="c5" checked>元教材の良い操作性を維持</label><label><input type="checkbox" id="c6" checked>回答は完成HTMLコードだけ</label></div></div>
+<div class="sect" style="margin-top:13px"><h3>コピーするプロンプト</h3></div><textarea id="prompt" readonly></textarea>
+</div>
+
+</section>
+</main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+const MAX=250000;
+const $=id=>document.getElementById(id);
+
+let mats=[];
+let current=null;
+let currentLoadToken=0;
+let runTimer=null;
+let runGeneration=0;
+let localFiles=null;
+let catalogBase="";
+let sourceMode="";
+
+function esc(s=""){
+  return String(s)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
+}
+function toast(s){
+  $("toast").textContent=s;
+  $("toast").classList.add("show");
+  clearTimeout(toast.t);
+  toast.t=setTimeout(()=>$("toast").classList.remove("show"),2200);
+}
+function slug(s){
+  return String(s||"material")
+    .normalize("NFKC")
+    .replace(/[^\w\u3040-\u30ff\u3400-\u9fff-]+/g,"-")
+    .replace(/^-|-$/g,"")
+    .slice(0,60)||"material";
+}
+function cur(){
+  return mats.find(m=>m.id===current)||null;
+}
+function validateCatalog(value){
+  if(!Array.isArray(value)||!value.length)throw new Error("materials.jsonに教材がありません。");
+  const ids=new Set();
+  return value.map((m,index)=>{
+    if(!m||typeof m!=="object")throw new Error(`${index+1}件目の教材情報が不正です。`);
+    for(const key of ["id","title","course","unit","level","description","file"]){
+      if(typeof m[key]!=="string"||!m[key].trim())throw new Error(`${index+1}件目の${key}がありません。`);
+    }
+    if(ids.has(m.id))throw new Error(`教材ID「${m.id}」が重複しています。`);
+    ids.add(m.id);
+    return {...m,code:""};
+  });
+}
+function setSourceStatus(text,state=""){
+  $("sourceStatus").textContent=text;
+  $("sourceStatus").className=`source-status ${state}`.trim();
+}
+function showLoadPanel(title,message){
+  $("loadTitle").textContent=title;
+  $("loadMessage").textContent=message;
+  $("loadPanel").hidden=false;
+  $("chooseFolderBtn").hidden=false;
+  setSourceStatus("フォルダ選択が必要","error");
+}
+function hideLoadPanel(){
+  $("loadPanel").hidden=true;
+}
+function normalizePath(path){
+  return String(path||"").replaceAll("\\","/").replace(/^\.?\//,"");
+}
+function buildLocalFileMap(files){
+  const map=new Map();
+  for(const file of files){
+    const full=normalizePath(file.webkitRelativePath||file.name);
+    map.set(full,file);
+    const parts=full.split("/");
+    if(parts.length>1)map.set(parts.slice(1).join("/"),file);
+    map.set(file.name,file);
+  }
+  return map;
+}
+function findLocalFile(path){
+  const target=normalizePath(path);
+  if(localFiles.has(target))return localFiles.get(target);
+  for(const [key,file] of localFiles){
+    if(key.endsWith("/"+target)||key===target)return file;
+  }
+  return null;
+}
+async function loadCatalogFromWeb(){
+  const response=await fetch("./materials.json",{cache:"no-store"});
+  if(!response.ok)throw new Error(`materials.jsonを取得できませんでした（${response.status}）。`);
+  mats=validateCatalog(await response.json());
+  sourceMode="web";
+  catalogBase=new URL(".",response.url).href;
+  setSourceStatus(`${mats.length}教材・自動読込`,"ok");
+}
+async function loadCatalogFromFolder(fileList){
+  localFiles=buildLocalFileMap(fileList);
+  let catalogFile=null;
+  for(const [key,file] of localFiles){
+    if(key.endsWith("materials.json")){
+      catalogFile=file;
+      break;
+    }
+  }
+  if(!catalogFile)throw new Error("選択したフォルダ内にmaterials.jsonがありません。");
+  mats=validateCatalog(JSON.parse(await catalogFile.text()));
+  for(const material of mats){
+    if(!findLocalFile(material.file)){
+      throw new Error(`教材ファイル「${material.file}」が見つかりません。`);
+    }
+  }
+  sourceMode="local";
+  setSourceStatus(`${mats.length}教材・ローカル読込`,"ok");
+  hideLoadPanel();
+}
+async function loadMaterialCode(material){
+  if(material.code)return material.code;
+  let code="";
+  if(sourceMode==="local"){
+    const file=findLocalFile(material.file);
+    if(!file)throw new Error(`教材ファイル「${material.file}」が見つかりません。`);
+    code=await file.text();
+  }else{
+    const url=new URL(material.file,catalogBase||location.href);
+    const response=await fetch(url,{cache:"no-store"});
+    if(!response.ok)throw new Error(`${material.title}を取得できませんでした（${response.status}）。`);
+    code=await response.text();
+  }
+  if(!code.trim())throw new Error(`${material.title}のHTMLが空です。`);
+  if(code.length>MAX)throw new Error(`${material.title}のHTMLが長すぎます。`);
+  material.code=code;
+  return code;
+}
+async function initialize(){
+  try{
+    if(location.protocol==="file:"){
+      throw new Error("ローカルファイルでは自動取得できません。");
+    }
+    await loadCatalogFromWeb();
+    await startLibrary();
+  }catch(error){
+    showLoadPanel(
+      "教材フォルダを選択してください",
+      location.protocol==="file:"
+        ?"このHTMLをダブルクリックで開いています。「プロジェクトフォルダを選択」から、index.htmlとmaterials.jsonが入ったフォルダを選んでください。"
+        :`自動読込に失敗しました：${error.message}`
+    );
+    clearScreen();
+  }
+}
+async function startLibrary(){
+  current=mats[0]?.id||null;
+  list();
+  if(current)await render();
+}
+function clearScreen(){
+  $("count").textContent="";
+  $("items").innerHTML="";
+  $("title").textContent="教材を読み込んでください";
+  $("desc").textContent="";
+  $("tags").innerHTML="";
+  $("editor").value="";
+  $("codeStatus").textContent="";
+  $("prompt").value="";
+  stop();
+}
+function list(){
+  const q=$("search").value.toLowerCase().trim();
+  const c=$("courseF").value;
+  const shown=mats.filter(m=>
+    (!q||`${m.title} ${m.course} ${m.unit} ${m.description}`.toLowerCase().includes(q))
+    &&(!c||m.course===c)
+  );
+  $("count").textContent=`${shown.length}件を表示（登録 ${mats.length}件）`;
+  $("items").innerHTML=shown.map(m=>`
+    <button class="item ${m.id===current?"active":""}" data-id="${esc(m.id)}">
+      <div class="ititle">${esc(m.title)}</div>
+      <div class="tags">
+        <span class="tag b">${esc(m.course)}</span>
+        <span class="tag">${esc(m.unit)}</span>
+      </div>
+    </button>
+  `).join("")||'<div class="count">該当する教材はありません。</div>';
+  document.querySelectorAll(".item").forEach(button=>{
+    button.onclick=async()=>{
+      if(button.dataset.id===current){
+        collapseLibrary();
+        return;
+      }
+      current=button.dataset.id;
+      list();
+      collapseLibrary();
+      await render();
+    };
+  });
+}
+async function render(){
+  const material=cur();
+  const token=++currentLoadToken;
+  if(!material){
+    clearScreen();
+    return;
+  }
+  $("title").textContent=material.title;
+  $("desc").textContent=material.description;
+  $("tags").innerHTML=`
+    <span class="tag b">${esc(material.course)}</span>
+    <span class="tag">${esc(material.unit)}</span>
+    <span class="tag">${esc(material.level)}</span>
+  `;
+  $("editor").value="";
+  $("codeStatus").textContent="教材HTMLを読み込み中…";
+  $("empty").textContent="教材を読み込んでいます…";
+  $("empty").style.display="grid";
+  try{
+    const code=await loadMaterialCode(material);
+    if(token!==currentLoadToken)return;
+    $("editor").value=code;
+    status();
+    makePromptText();
+    switchRunnerPane("preview");
+    requestAnimationFrame(()=>requestAnimationFrame(run));
+  }catch(error){
+    if(token!==currentLoadToken)return;
+    $("codeStatus").textContent="読込エラー";
+    $("empty").textContent=error.message;
+    $("empty").style.display="grid";
+    setSourceStatus("教材読込エラー","error");
+  }
+}
+function status(){
+  const material=cur();
+  const n=$("editor").value.length;
+  $("codeStatus").textContent=
+    `${n.toLocaleString()}文字`
+    +`${material&&material.code&&$("editor").value!==material.code?"・元教材から変更あり":""}`
+    +`${n>MAX?"・上限超過":""}`;
+}
+function switchRunnerPane(name){
+  document.querySelectorAll(".runner-subtab").forEach(button=>{
+    const on=button.dataset.runnerTab===name;
+    button.classList.toggle("on",on);
+    button.setAttribute("aria-selected",String(on));
+  });
+  document.querySelectorAll(".runner-pane").forEach(pane=>
+    pane.classList.toggle("on",pane.dataset.runnerPane===name)
+  );
+}
+function applyPreviewScale(){
+  const scale=Number($("previewScale").value||100)/100;
+  const frame=$("frame");
+  if(!frame)return;
+  frame.style.width=`${100/scale}%`;
+  frame.style.height=`${100/scale}%`;
+  frame.style.transform=`scale(${scale})`;
+}
+function toggleFocus(force){
+  const next=typeof force==="boolean"
+    ?force
+    :!document.body.classList.contains("runner-focus");
+  document.body.classList.toggle("runner-focus",next);
+  $("focusBtn").textContent=next?"集中表示を終了":"集中表示";
+  requestAnimationFrame(applyPreviewScale);
+}
+function toggleDetails(){
+  const head=$("materialHead");
+  const open=head.classList.toggle("details-open");
+  $("detailsToggle").textContent=open?"教材説明を閉じる":"教材説明を見る";
+}
+function updateLibraryToggle(){
+  const collapsed=document.querySelector(".layout").classList.contains("side-collapsed");
+  $("libraryToggle").textContent=collapsed?"教材一覧を開く":"教材一覧を閉じる";
+}
+function collapseLibrary(){
+  if(window.matchMedia("(max-width:730px)").matches){
+    document.querySelector(".layout").classList.add("side-collapsed");
+    updateLibraryToggle();
+  }
+}
+function toggleLibrary(){
+  document.querySelector(".layout").classList.toggle("side-collapsed");
+  updateLibraryToggle();
+}
+function csp(code){
+  let clean=code.replace(
+    /<meta\b[^>]*\bhttp-equiv\s*=\s*(?:"content-security-policy(?:-report-only)?"|'content-security-policy(?:-report-only)?'|content-security-policy(?:-report-only)?)[^>]*>/gi,
+    ""
+  );
+  const policy=`<meta http-equiv="Content-Security-Policy" content="default-src 'none';script-src 'unsafe-inline';style-src 'unsafe-inline';img-src data: blob:;media-src data: blob:;connect-src 'none';frame-src 'none';object-src 'none';form-action 'none';base-uri 'none'">`;
+  return /<head[\s>]/i.test(clean)
+    ?clean.replace(/<head([^>]*)>/i,`<head$1>${policy}`)
+    :`<!doctype html><html><head><meta charset="utf-8">${policy}</head><body>${clean}</body></html>`;
+}
+function createPreviewFrame(){
+  const oldFrame=$("frame");
+  const frame=document.createElement("iframe");
+  frame.id="frame";
+  frame.title="教材プレビュー";
+  frame.setAttribute("sandbox","allow-scripts");
+  frame.setAttribute("referrerpolicy","no-referrer");
+  frame.onload=()=>requestAnimationFrame(applyPreviewScale);
+  oldFrame.replaceWith(frame);
+  return frame;
+}
+function run(){
+  const code=$("editor").value;
+  if(!code.trim())return alert("コードが空です");
+  if(code.length>MAX)return alert("コードが長すぎます");
+  const generation=++runGeneration;
+  clearTimeout(runTimer);
+  $("empty").style.display="grid";
+  $("empty").textContent="教材を読み込んでいます…";
+  runTimer=setTimeout(()=>{
+    if(generation!==runGeneration)return;
+    const frame=createPreviewFrame();
+    frame.srcdoc=csp(code);
+    $("empty").style.display="none";
+    requestAnimationFrame(applyPreviewScale);
+  },30);
+}
+function stop(){
+  runGeneration++;
+  clearTimeout(runTimer);
+  runTimer=null;
+  const frame=createPreviewFrame();
+  frame.src="about:blank";
+  $("empty").textContent="停止しました。再度「実行」を押すと表示されます。";
+  $("empty").style.display="grid";
+}
+async function copy(text,message){
+  try{
+    await navigator.clipboard.writeText(text);
+  }catch{
+    const temp=document.createElement("textarea");
+    temp.value=text;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand("copy");
+    temp.remove();
+  }
+  toast(message);
+}
+function download(name,content,type){
+  const url=URL.createObjectURL(new Blob([content],{type}));
+  const anchor=document.createElement("a");
+  anchor.href=url;
+  anchor.download=name;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}
+function makePromptText(){
+  const material=cur();
+  if(!material||!material.code)return;
+  const conditions=[];
+  if($("c1").checked)conditions.push("HTML・CSS・JavaScriptをすべて含む1ファイルHTMLにする");
+  if($("c2").checked)conditions.push("外部ライブラリ、CDN、API、外部通信を使わない");
+  if($("c3").checked)conditions.push("画面上の表示と説明は日本語にする");
+  if($("c4").checked)conditions.push("PCとタブレットで見やすくする");
+  if($("c5").checked)conditions.push("元教材の良い操作性と段階的説明を維持する");
+  if($("c6").checked)conditions.push("回答は完成したHTMLコードだけにする");
+  $("prompt").value=`以下の数学教材HTMLを、生徒の問題に合わせて改変してください。
+
+【元教材】
+${material.title}
+科目・単元：${material.course}／${material.unit}
+目的：
+${material.description}
+
+【生徒の問題・条件】
+${$("problem").value.trim()||"（ここに問題を入力）"}
+
+【改変してほしい内容】
+${$("request").value.trim()||"（ここに変更内容を入力）"}
+
+【必須条件】
+${conditions.map((condition,index)=>`${index+1}. ${condition}`).join("\n")}
+
+【元のHTMLコード】
+\`\`\`html
+${material.code}
+\`\`\``;
+}
+
+document.querySelectorAll(".tab").forEach(button=>{
+  button.onclick=()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===button));
+    document.querySelectorAll(".panel").forEach(panel=>
+      panel.classList.toggle("on",panel.id===`p-${button.dataset.tab}`)
+    );
+  };
+});
+document.querySelectorAll(".runner-subtab").forEach(button=>{
+  button.onclick=()=>switchRunnerPane(button.dataset.runnerTab);
+});
+
+$("libraryToggle").onclick=toggleLibrary;
+$("detailsToggle").onclick=toggleDetails;
+$("focusBtn").onclick=()=>toggleFocus();
+$("previewScale").onchange=applyPreviewScale;
+$("chooseFolderBtn").onclick=()=>$("folderPicker").click();
+$("loadFolderBtn").onclick=()=>$("folderPicker").click();
+$("folderPicker").onchange=async event=>{
+  try{
+    const files=[...event.target.files];
+    if(!files.length)return;
+    setSourceStatus("フォルダを確認中…");
+    await loadCatalogFromFolder(files);
+    await startLibrary();
+  }catch(error){
+    showLoadPanel("読み込みに失敗しました",error.message);
+  }finally{
+    event.target.value="";
+  }
+};
+
+window.addEventListener("resize",()=>{
+  updateLibraryToggle();
+  requestAnimationFrame(applyPreviewScale);
+});
+window.addEventListener("keydown",event=>{
+  if(event.key==="Escape"&&document.body.classList.contains("runner-focus")){
+    toggleFocus(false);
+  }
+});
+
+$("search").oninput=list;
+$("courseF").onchange=list;
+$("editor").oninput=status;
+$("runBtn").onclick=()=>{
+  switchRunnerPane("preview");
+  requestAnimationFrame(()=>requestAnimationFrame(run));
+};
+$("stopBtn").onclick=stop;
+$("copyCode").onclick=()=>copy($("editor").value,"コードをコピーしました");
+$("resetCode").onclick=()=>{
+  const material=cur();
+  if(!material||!material.code)return;
+  if($("editor").value!==material.code&&!confirm("編集内容を破棄して、元教材のコードに戻しますか？"))return;
+  $("editor").value=material.code;
+  status();
+  switchRunnerPane("preview");
+  requestAnimationFrame(()=>requestAnimationFrame(run));
+};
+$("saveHtml").onclick=()=>{
+  const material=cur();
+  if(!material)return alert("教材を選択してください");
+  download(`${slug(material.title)}.html`,$("editor").value,"text/html;charset=utf-8");
+};
+$("makePrompt").onclick=makePromptText;
+$("copyPrompt").onclick=()=>{
+  makePromptText();
+  copy($("prompt").value,"プロンプトをコピーしました");
+};
+["problem","request"].forEach(id=>$(id).oninput=makePromptText);
+["c1","c2","c3","c4","c5","c6"].forEach(id=>$(id).onchange=makePromptText);
+
+updateLibraryToggle();
+switchRunnerPane("preview");
+applyPreviewScale();
+initialize();
+</script>
+</body></html>

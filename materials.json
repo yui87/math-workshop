@@ -1,0 +1,101 @@
+[
+  {
+    "id": "quad",
+    "title": "二次関数の最大・最小",
+    "course": "数学I",
+    "unit": "二次関数",
+    "level": "高校標準",
+    "description": "定義域内の頂点と両端の値を比較し、最大値・最小値を視覚化します。",
+    "file": "materials/quad.html"
+  },
+  {
+    "id": "trig-ratio",
+    "title": "三角比―直角三角形の辺の比",
+    "course": "数学I",
+    "unit": "図形と計量",
+    "level": "高校基礎",
+    "description": "直角三角形の辺の比としてsin・cos・tanを確認し、代表角では厳密値も表示します。",
+    "file": "materials/trig-ratio.html"
+  },
+  {
+    "id": "unit-circle",
+    "title": "三角関数―単位円と一般角",
+    "course": "数学II",
+    "unit": "三角関数",
+    "level": "高校標準",
+    "description": "単位円上の座標とsin・cos・tanを結びつけ、一般角でも代表角の厳密値を表示します。",
+    "file": "materials/unit-circle.html"
+  },
+  {
+    "id": "derivative-tangent",
+    "title": "微分―接線の傾きと導関数",
+    "course": "数学II",
+    "unit": "微分法",
+    "level": "高校標準",
+    "description": "接点を動かして接線の傾きを記録し、導関数のグラフが形成される様子を体験します。",
+    "file": "materials/derivative-tangent.html"
+  },
+  {
+    "id": "riemann-sum",
+    "title": "積分―区分求積法（リーマン和）",
+    "course": "数学III",
+    "unit": "積分法",
+    "level": "高校標準",
+    "description": "分割数と標本点を変え、長方形の面積の合計が定積分へ近づく様子を確認します。",
+    "file": "materials/riemann-sum.html"
+  },
+  {
+    "id": "diff",
+    "title": "合成関数の微分を分解する",
+    "course": "数学III",
+    "unit": "微分法",
+    "level": "高校標準",
+    "description": "外側・内側の関数と、それぞれの微分を段階的に表示します。",
+    "file": "materials/composite-derivative.html"
+  },
+  {
+    "id": "riemann-inequality",
+    "title": "区分求積法による不等式評価",
+    "course": "数学III",
+    "unit": "積分法・数列",
+    "level": "高校発展",
+    "description": "f(x)=1/xの左端和・右端和で真の面積を挟み、調和和の不等式と発散を可視化します。",
+    "file": "materials/riemann-inequality.html"
+  },
+  {
+    "id": "complex-plane",
+    "title": "複素数平面―積・商と回転",
+    "course": "数学C",
+    "unit": "複素数平面",
+    "level": "高校標準",
+    "description": "複素数の積・商を、絶対値の積・商と偏角の和・差としてガウス平面上で確認します。",
+    "file": "materials/complex-plane.html"
+  },
+  {
+    "id": "vector-region",
+    "title": "ベクトルの一次結合と領域",
+    "course": "数学C",
+    "unit": "平面上のベクトル",
+    "level": "高校標準",
+    "description": "係数s,tの条件によって、一次結合p=sa+tbの領域が直線・三角形・平行四辺形になることを示します。",
+    "file": "materials/vector-region.html"
+  },
+  {
+    "id": "regression",
+    "title": "データの分析―相関と回帰直線",
+    "course": "数学I",
+    "unit": "データの分析",
+    "level": "高校標準",
+    "description": "散布図の点を追加・移動・削除し、外れ値が相関係数と回帰直線に与える影響を体験します。",
+    "file": "materials/regression.html"
+  },
+  {
+    "id": "binomial-normal",
+    "title": "二項分布と正規分布近似",
+    "course": "数学B",
+    "unit": "統計的な推測",
+    "level": "高校発展",
+    "description": "B(n,p)の確率質量関数とN(np,np(1-p))の密度を重ね、正規近似の条件を観察します。",
+    "file": "materials/binomial-normal.html"
+  }
+]

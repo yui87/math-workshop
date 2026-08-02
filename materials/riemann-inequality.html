@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>区分求積法による不等式評価</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #64748b;
+      --line: #dbe3ee;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --upper: #dc2626;
+      --upper-soft: rgba(239, 68, 68, 0.18);
+      --lower: #2563eb;
+      --lower-soft: rgba(37, 99, 235, 0.23);
+      --green: #047857;
+      --green-soft: #d1fae5;
+      --amber: #92400e;
+      --amber-soft: #fef3c7;
+      --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background: var(--bg);
+      color: var(--text);
+      font-family:
+        -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "Hiragino Sans", "Yu Gothic UI", "Yu Gothic",
+        Meiryo, sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .app {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    header {
+      padding: 22px 24px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(22px, 3.5vw, 34px);
+      letter-spacing: -0.03em;
+    }
+
+    .lead {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .formula-main {
+      margin-top: 15px;
+      padding: 13px 16px;
+      border-radius: 13px;
+      background: #eff6ff;
+      color: #1e3a8a;
+      text-align: center;
+      font-family: "Times New Roman", "Yu Mincho", serif;
+      font-size: clamp(20px, 3vw, 29px);
+      font-weight: 700;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .control-card {
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) auto;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .slider-row {
+      display: grid;
+      grid-template-columns: auto minmax(180px, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .slider-row label {
+      font-weight: 800;
+      color: #334155;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+
+    .n-value {
+      min-width: 64px;
+      padding: 7px 11px;
+      border-radius: 10px;
+      background: var(--accent-soft);
+      color: #1d4ed8;
+      text-align: center;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .toggle-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .check-label {
+      display: inline-flex;
+      gap: 7px;
+      align-items: center;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .check-label input {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--accent);
+    }
+
+    .graph-card {
+      padding: 18px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 10px 18px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .legend-color {
+      width: 18px;
+      height: 12px;
+      border-radius: 3px;
+      border: 2px solid;
+    }
+
+    .legend-color.upper {
+      background: var(--upper-soft);
+      border-color: var(--upper);
+    }
+
+    .legend-color.lower {
+      background: var(--lower-soft);
+      border-color: var(--lower);
+    }
+
+    .legend-line {
+      width: 24px;
+      border-top: 4px solid #0f172a;
+      border-radius: 999px;
+    }
+
+    .canvas-wrap {
+      width: 100%;
+      height: clamp(370px, 61vh, 660px);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .values {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .value-card {
+      padding: 15px;
+      border-radius: 15px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      box-shadow: 0 7px 20px rgba(15, 23, 42, 0.05);
+    }
+
+    .value-card.upper {
+      border-color: #fecaca;
+      background: #fff7f7;
+    }
+
+    .value-card.lower {
+      border-color: #bfdbfe;
+      background: #f5f9ff;
+    }
+
+    .value-card.integral {
+      border-color: #bbf7d0;
+      background: #f3fff9;
+    }
+
+    .value-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+
+    .value-number {
+      margin-top: 7px;
+      color: var(--text);
+      font-size: clamp(20px, 2.8vw, 28px);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .value-detail {
+      margin-top: 5px;
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .explanation {
+      padding: 20px 22px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .explanation h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .math-box {
+      padding: 14px 16px;
+      border: 1px solid #bfdbfe;
+      border-radius: 13px;
+      background: #eff6ff;
+      color: #1e3a8a;
+      text-align: center;
+      font-family: "Times New Roman", "Yu Mincho", serif;
+      font-size: clamp(17px, 2.4vw, 24px);
+      font-weight: 700;
+      line-height: 1.7;
+      overflow-x: auto;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .comparison {
+      padding: 14px;
+      border-radius: 13px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      line-height: 1.75;
+    }
+
+    .comparison strong {
+      color: #1d4ed8;
+    }
+
+    .gap-card {
+      padding: 15px 17px;
+      border-radius: 13px;
+      background: var(--amber-soft);
+      color: var(--amber);
+      line-height: 1.75;
+    }
+
+    .gap-formula {
+      margin-top: 7px;
+      font-family: "Times New Roman", "Yu Mincho", serif;
+      font-size: 19px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .conclusion {
+      padding: 15px 17px;
+      border-radius: 13px;
+      background: var(--green-soft);
+      color: var(--green);
+      line-height: 1.75;
+      font-weight: 700;
+    }
+
+    .small-note {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.75;
+    }
+
+    @media (max-width: 900px) {
+      .values {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .control-card {
+        grid-template-columns: 1fr;
+      }
+
+      .toggle-group {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 650px) {
+      body {
+        padding: 10px;
+      }
+
+      header,
+      .explanation {
+        padding: 17px;
+      }
+
+      .control-card,
+      .graph-card {
+        padding: 13px;
+      }
+
+      .slider-row {
+        grid-template-columns: 1fr auto;
+      }
+
+      .slider-row label {
+        grid-column: 1 / -1;
+      }
+
+      .values,
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .canvas-wrap {
+        height: min(61vh, 510px);
+        min-height: 350px;
+      }
+
+      .formula-main {
+        font-size: 19px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="card">
+      <h1>区分求積法による不等式評価</h1>
+      <p class="lead">
+        単調減少する関数 <strong>f(x)=1/x</strong> を、
+        左端の高さを使う長方形と右端の高さを使う長方形で挟みます。
+        長方形の和と曲線下の面積を比較し、調和和の不等式を確かめましょう。
+      </p>
+      <div class="formula-main" id="mainInequality">
+        log(n+1) &lt; Σ<sub>k=1</sub><sup>n</sup> 1/k
+        &lt; 1+log n
+      </div>
+    </header>
+
+    <section class="card control-card">
+      <div class="slider-row">
+        <label for="nSlider">項数・分割数 n</label>
+        <input
+          id="nSlider"
+          type="range"
+          min="1"
+          max="30"
+          step="1"
+          value="8"
+        >
+        <output class="n-value" id="nValue">8</output>
+      </div>
+
+      <div class="toggle-group">
+        <label class="check-label">
+          <input id="showUpper" type="checkbox" checked>
+          左端長方形
+        </label>
+        <label class="check-label">
+          <input id="showLower" type="checkbox" checked>
+          右端長方形
+        </label>
+      </div>
+    </section>
+
+    <section class="card graph-card">
+      <div class="legend">
+        <span class="legend-item">
+          <span class="legend-color upper"></span>
+          左端の高さ 1/k：上から抑える
+        </span>
+        <span class="legend-item">
+          <span class="legend-color lower"></span>
+          右端の高さ 1/(k+1)：下から抑える
+        </span>
+        <span class="legend-item">
+          <span class="legend-line"></span>
+          y=1/x
+        </span>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="graph" aria-label="1/xのグラフと長方形近似"></canvas>
+      </div>
+    </section>
+
+    <section class="values">
+      <article class="value-card upper">
+        <div class="value-label">
+          左端和 H<sub>n</sub><br>
+          Σ<sub>k=1</sub><sup>n</sup> 1/k
+        </div>
+        <div class="value-number" id="leftSumValue">0</div>
+        <div class="value-detail">
+          曲線下の面積より大きい
+        </div>
+      </article>
+
+      <article class="value-card lower">
+        <div class="value-label">
+          右端和 R<sub>n</sub><br>
+          Σ<sub>k=1</sub><sup>n</sup> 1/(k+1)
+        </div>
+        <div class="value-number" id="rightSumValue">0</div>
+        <div class="value-detail">
+          曲線下の面積より小さい
+        </div>
+      </article>
+
+      <article class="value-card integral">
+        <div class="value-label">
+          真の面積<br>
+          ∫<sub>1</sub><sup>n+1</sup> 1/x dx
+        </div>
+        <div class="value-number" id="integralValue">0</div>
+        <div class="value-detail">
+          log(n+1)
+        </div>
+      </article>
+
+      <article class="value-card">
+        <div class="value-label">
+          上側の比較値<br>
+          1+log n
+        </div>
+        <div class="value-number" id="upperBoundValue">0</div>
+        <div class="value-detail" id="upperBoundNote">
+          Hₙより大きい
+        </div>
+        <div class="value-detail" style="margin-top:6px">
+          ※ これは不等式の右辺の値で、図の右端長方形の和（Rₙ）とは別の数値です
+        </div>
+      </article>
+    </section>
+
+    <section class="card explanation">
+      <h2>長方形と面積の関係</h2>
+
+      <div class="math-box" id="rectangleInequality">
+        Σ 1/(k+1) &lt; ∫₁ⁿ⁺¹ 1/x dx &lt; Σ 1/k
+      </div>
+
+      <div class="comparison-grid">
+        <div class="comparison">
+          <strong>左端の長方形</strong><br>
+          f(x)=1/x は減少するので、区間 [k,k+1] では
+          左端の高さ 1/k が曲線より上にあります。したがって、
+          左端長方形の面積は真の面積を上から抑えます。
+        </div>
+
+        <div class="comparison">
+          <strong>右端の長方形</strong><br>
+          同じ区間では、右端の高さ 1/(k+1) が曲線より下にあります。
+          したがって、右端長方形の面積は真の面積を下から抑えます。
+        </div>
+      </div>
+
+      <div class="math-box" id="targetInequality">
+        log(n+1) &lt; Hₙ &lt; 1+log n
+      </div>
+
+      <p class="small-note">
+        左側の不等式は、図にある区間 [1,n+1] の左端長方形から得られます。
+        右側の不等式は、同じ単調減少性を区間 [k−1,k]
+        （k=2,…,n）に適用すると
+        H<sub>n</sub>−1&lt;∫<sub>1</sub><sup>n</sup>1/x dx=log n
+        となることから得られます。
+        n=1では右側は等号になります。
+      </p>
+
+      <div class="gap-card">
+        <strong>長方形の和どうしの差は0には近づきません。</strong>
+        各区間の差は小さくなりますが、n区間分を合計すると次のように望遠和になります。
+        <div class="gap-formula" id="gapFormula">
+          Hₙ−Rₙ = 1−1/(n+1)
+        </div>
+        <div id="gapValues"></div>
+      </div>
+
+      <div class="conclusion">
+        この評価から H<sub>n</sub>&gt;log(n+1) が分かります。
+        log(n+1) は無限に大きくなるため、調和級数
+        Σ1/k も発散します。また H<sub>n</sub> は log n と定数程度の差で増え、
+        「対数のオーダーで発散する」ことが読み取れます。
+      </div>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+
+    const nSlider = document.getElementById("nSlider");
+    const nValue = document.getElementById("nValue");
+    const showUpper = document.getElementById("showUpper");
+    const showLower = document.getElementById("showLower");
+
+    const canvas = document.getElementById("graph");
+    const context = canvas.getContext("2d");
+
+    const leftSumValue = document.getElementById("leftSumValue");
+    const rightSumValue = document.getElementById("rightSumValue");
+    const integralValue = document.getElementById("integralValue");
+    const upperBoundValue = document.getElementById("upperBoundValue");
+    const upperBoundNote = document.getElementById("upperBoundNote");
+
+    const mainInequality = document.getElementById("mainInequality");
+    const rectangleInequality =
+      document.getElementById("rectangleInequality");
+    const targetInequality = document.getElementById("targetInequality");
+    const gapFormula = document.getElementById("gapFormula");
+    const gapValues = document.getElementById("gapValues");
+
+    let resizeFrame = null;
+
+    function harmonicNumber(n) {
+      let sum = 0;
+
+      for (let k = 1; k <= n; k += 1) {
+        sum += 1 / k;
+      }
+
+      return sum;
+    }
+
+    function rightEndpointSum(n) {
+      let sum = 0;
+
+      for (let k = 1; k <= n; k += 1) {
+        sum += 1 / (k + 1);
+      }
+
+      return sum;
+    }
+
+    function formatNumber(value) {
+      return value.toFixed(6);
+    }
+
+    function updateValues() {
+      const n = Number(nSlider.value);
+      const leftSum = harmonicNumber(n);
+      const rightSum = rightEndpointSum(n);
+      const integral = Math.log(n + 1);
+      const upperBound = 1 + Math.log(n);
+
+      const rectangleGap = leftSum - rightSum;
+      const leftError = leftSum - integral;
+      const rightError = integral - rightSum;
+      const targetWidth = upperBound - integral;
+
+      nValue.textContent = String(n);
+      leftSumValue.textContent = formatNumber(leftSum);
+      rightSumValue.textContent = formatNumber(rightSum);
+      integralValue.textContent = formatNumber(integral);
+      upperBoundValue.textContent = formatNumber(upperBound);
+
+      if (n === 1) {
+        mainInequality.innerHTML =
+          "log 2 &lt; H<sub>1</sub> = 1+log 1";
+        targetInequality.innerHTML =
+          "log 2 &lt; H<sub>1</sub> = 1+log 1";
+        upperBoundNote.textContent = "n=1ではH₁と等しい";
+      } else {
+        mainInequality.innerHTML =
+          `log(${n + 1}) &lt; ` +
+          `Σ<sub>k=1</sub><sup>${n}</sup> 1/k ` +
+          `&lt; 1+log ${n}`;
+
+        targetInequality.innerHTML =
+          `log(${n + 1}) &lt; H<sub>${n}</sub> ` +
+          `&lt; 1+log ${n}`;
+
+        upperBoundNote.textContent = "Hₙより大きい";
+      }
+
+      rectangleInequality.innerHTML =
+        `Σ<sub>k=1</sub><sup>${n}</sup> 1/(k+1) ` +
+        `&lt; ∫<sub>1</sub><sup>${n + 1}</sup> 1/x dx ` +
+        `&lt; Σ<sub>k=1</sub><sup>${n}</sup> 1/k`;
+
+      gapFormula.innerHTML =
+        `H<sub>${n}</sub>−R<sub>${n}</sub> ` +
+        `= 1−1/${n + 1} ` +
+        `= ${formatNumber(rectangleGap)}`;
+
+      gapValues.innerHTML =
+        `左端和と真の面積の差：` +
+        `<strong>${formatNumber(leftError)}</strong><br>` +
+        `真の面積と右端和の差：` +
+        `<strong>${formatNumber(rightError)}</strong><br>` +
+        `不等式 log(n+1)&lt;Hₙ&lt;1+log n の上下幅：` +
+        `<strong>${formatNumber(targetWidth)}</strong><br>` +
+        `長方形和どうしの差は n→∞ で ` +
+        `<strong>1</strong> に近づきます。`;
+
+      draw();
+    }
+
+    function fitCanvas() {
+      const bounds = canvas.getBoundingClientRect();
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+
+      canvas.width = Math.max(1, Math.round(bounds.width * ratio));
+      canvas.height = Math.max(1, Math.round(bounds.height * ratio));
+
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      draw();
+    }
+
+    function draw() {
+      const bounds = canvas.getBoundingClientRect();
+      const width = bounds.width;
+      const height = bounds.height;
+
+      if (width <= 0 || height <= 0) {
+        return;
+      }
+
+      const n = Number(nSlider.value);
+
+      const margin = {
+        left: width < 520 ? 46 : 58,
+        right: 18,
+        top: 22,
+        bottom: 45
+      };
+
+      const plotWidth = width - margin.left - margin.right;
+      const plotHeight = height - margin.top - margin.bottom;
+
+      const xMin = 0.8;
+      const xMax = n + 1.25;
+      const yMin = 0;
+      const yMax = 1.08;
+
+      const toX = value =>
+        margin.left +
+        ((value - xMin) / (xMax - xMin)) * plotWidth;
+
+      const toY = value =>
+        margin.top +
+        ((yMax - value) / (yMax - yMin)) * plotHeight;
+
+      context.clearRect(0, 0, width, height);
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, width, height);
+
+      drawGrid();
+      drawRectangles();
+      drawAxes();
+      drawCurve();
+      drawLabels();
+
+      function drawGrid() {
+        context.save();
+        context.strokeStyle = "#e2e8f0";
+        context.lineWidth = 1;
+
+        const xTickStep =
+          n <= 10 ? 1 :
+          n <= 20 ? 2 :
+          5;
+
+        for (
+          let value = Math.ceil(xMin);
+          value <= Math.floor(xMax);
+          value += xTickStep
+        ) {
+          context.beginPath();
+          context.moveTo(toX(value), margin.top);
+          context.lineTo(toX(value), toY(0));
+          context.stroke();
+        }
+
+        for (let value = 0.2; value <= 1.001; value += 0.2) {
+          context.beginPath();
+          context.moveTo(margin.left, toY(value));
+          context.lineTo(width - margin.right, toY(value));
+          context.stroke();
+        }
+
+        context.restore();
+      }
+
+      function drawRectangles() {
+        for (let k = 1; k <= n; k += 1) {
+          const left = toX(k);
+          const right = toX(k + 1);
+          const rectangleWidth = right - left;
+
+          const upperHeight = 1 / k;
+          const lowerHeight = 1 / (k + 1);
+
+          if (showUpper.checked) {
+            context.save();
+            context.fillStyle = "rgba(239, 68, 68, 0.18)";
+            context.strokeStyle = "rgba(220, 38, 38, 0.82)";
+            context.lineWidth = 1.2;
+
+            const top = toY(upperHeight);
+            const bottom = toY(0);
+
+            context.fillRect(
+              left,
+              top,
+              rectangleWidth,
+              bottom - top
+            );
+
+            context.strokeRect(
+              left,
+              top,
+              rectangleWidth,
+              bottom - top
+            );
+
+            context.restore();
+          }
+
+          if (showLower.checked) {
+            context.save();
+            context.fillStyle = "rgba(37, 99, 235, 0.23)";
+            context.strokeStyle = "rgba(37, 99, 235, 0.9)";
+            context.lineWidth = 1.3;
+
+            const top = toY(lowerHeight);
+            const bottom = toY(0);
+
+            context.fillRect(
+              left,
+              top,
+              rectangleWidth,
+              bottom - top
+            );
+
+            context.strokeRect(
+              left,
+              top,
+              rectangleWidth,
+              bottom - top
+            );
+
+            context.restore();
+          }
+        }
+      }
+
+      function drawAxes() {
+        context.save();
+        context.strokeStyle = "#475569";
+        context.lineWidth = 2;
+
+        context.beginPath();
+        context.moveTo(margin.left, toY(0));
+        context.lineTo(width - margin.right, toY(0));
+        context.stroke();
+
+        context.beginPath();
+        context.moveTo(toX(1), margin.top);
+        context.lineTo(toX(1), toY(0));
+        context.stroke();
+
+        context.restore();
+      }
+
+      function drawCurve() {
+        context.save();
+        context.strokeStyle = "#0f172a";
+        context.lineWidth = 3;
+        context.lineJoin = "round";
+        context.lineCap = "round";
+        context.beginPath();
+
+        const start = 1;
+        const end = n + 1;
+        const samples = Math.max(450, Math.round(plotWidth * 1.4));
+
+        for (let index = 0; index <= samples; index += 1) {
+          const value =
+            start + ((end - start) * index) / samples;
+          const px = toX(value);
+          const py = toY(1 / value);
+
+          if (index === 0) {
+            context.moveTo(px, py);
+          } else {
+            context.lineTo(px, py);
+          }
+        }
+
+        context.stroke();
+        context.restore();
+      }
+
+      function drawLabels() {
+        context.save();
+        context.fillStyle = "#475569";
+        context.font =
+          width < 520
+            ? "11px sans-serif"
+            : "12px sans-serif";
+        context.textAlign = "center";
+        context.textBaseline = "top";
+
+        const xTickStep =
+          n <= 10 ? 1 :
+          n <= 20 ? 2 :
+          5;
+
+        for (
+          let value = 1;
+          value <= n + 1;
+          value += xTickStep
+        ) {
+          context.fillText(
+            String(value),
+            toX(value),
+            toY(0) + 7
+          );
+        }
+
+        if ((n + 1 - 1) % xTickStep !== 0) {
+          context.fillText(
+            String(n + 1),
+            toX(n + 1),
+            toY(0) + 7
+          );
+        }
+
+        context.textAlign = "right";
+        context.textBaseline = "middle";
+
+        for (let value = 0.2; value <= 1.001; value += 0.2) {
+          context.fillText(
+            value.toFixed(1),
+            margin.left - 7,
+            toY(value)
+          );
+        }
+
+        context.fillStyle = "#0f172a";
+        context.font = "bold 13px sans-serif";
+        context.textAlign = "left";
+        context.textBaseline = "bottom";
+        context.fillText(
+          "y = 1/x",
+          toX(1.12),
+          toY(0.92)
+        );
+
+        context.textAlign = "right";
+        context.textBaseline = "top";
+        context.fillText(
+          "x",
+          width - margin.right,
+          toY(0) + 23
+        );
+
+        context.restore();
+      }
+    }
+
+    nSlider.addEventListener("input", updateValues);
+    showUpper.addEventListener("change", draw);
+    showLower.addEventListener("change", draw);
+
+    window.addEventListener("resize", () => {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(fitCanvas);
+    });
+
+    if ("ResizeObserver" in window) {
+      const observer = new ResizeObserver(() => {
+        cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(fitCanvas);
+      });
+
+      observer.observe(canvas.parentElement);
+    }
+
+    updateValues();
+    requestAnimationFrame(fitCanvas);
+  </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "id": "new-material-id",
+  "title": "教材名",
+  "course": "数学B",
+  "unit": "単元名",
+  "level": "高校標準",
+  "description": "教材の目的を記入します。",
+  "file": "materials/new-material.html"
+}

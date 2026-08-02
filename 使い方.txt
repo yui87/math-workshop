@@ -1,0 +1,14 @@
+【ローカルで試す】
+1. ZIPを展開します。
+2. index.htmlをダブルクリックします。
+3. 「プロジェクトフォルダを選択」を押します。
+4. index.html・materials.json・materialsフォルダが入った「dynamic_math_workshop_external」フォルダを選びます。
+
+【Webで公開する】
+フォルダ構成を変えずに、そのまま静的サイトへアップロードします。
+Web上ではフォルダ選択なしで自動的に教材を読み込みます。
+
+【新しい教材を追加する】
+1. 新しいHTMLをmaterialsフォルダへ入れます。
+2. materials.jsonに教材情報を1件追加します。
+3. index.htmlは変更しません。

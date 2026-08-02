@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>二次関数の最大・最小</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:22px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#f8fafc;color:#172033}.app{max-width:980px;margin:auto;background:#fff;border:1px solid #dbe3ee;border-radius:18px;padding:20px;box-shadow:0 12px 30px rgba(15,23,42,.07)}h1{margin:0 0 8px;font-size:clamp(22px,3vw,30px)}p{line-height:1.7}.controls{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;padding:14px;background:#f1f5f9;border-radius:14px;margin:16px 0}.control label{display:flex;justify-content:space-between;font-weight:700;color:#334155;margin-bottom:6px}.value{color:#2563eb}.control input{width:100%}button{padding:10px 14px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}button:hover{background:#1d4ed8}.canvas-wrap{position:relative}canvas{display:block;width:100%;height:auto;min-height:360px;border:1px solid #dbe3ee;border-radius:14px;background:#fff}.result{margin-top:12px;background:#eff6ff;padding:12px 14px;border-radius:11px;line-height:1.75}.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:#475569;margin:8px 2px}.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}@media(max-width:680px){body{padding:12px}.app{padding:14px}.controls{grid-template-columns:1fr}.controls button{width:100%}canvas{min-height:300px}}
+</style>
+</head>
+<body>
+<div class="app">
+<h1>二次関数の最大・最小</h1>
+<p><b>y=x²-4x+5</b> を、選んだ定義域で考えます。頂点と定義域の両端が候補になることを、グラフで確かめましょう。</p>
+<div class="controls">
+  <div class="control"><label>左端 <span class="value" id="av">0</span></label><input id="a" type="range" min="-5" max="7" step="1" value="0"></div>
+  <div class="control"><label>右端 <span class="value" id="bv">5</span></label><input id="b" type="range" min="-4" max="8" step="1" value="5"></div>
+  <button id="ans" type="button">答えを確認</button>
+</div>
+<div class="legend"><span><i class="dot" style="background:#047857"></i>定義域の両端</span><span><i class="dot" style="background:#dc2626"></i>頂点</span><span><i class="dot" style="background:#2563eb"></i>関数</span></div>
+<div class="canvas-wrap"><canvas id="cv" width="1000" height="520"></canvas></div>
+<div class="result" id="res">まず、頂点と定義域の両端の値を比べてみましょう。</div>
+</div>
+<script>
+const cv=document.getElementById("cv"),ctx=cv.getContext("2d"),a=document.getElementById("a"),b=document.getElementById("b"),av=document.getElementById("av"),bv=document.getElementById("bv"),ans=document.getElementById("ans"),res=document.getElementById("res");
+let show=false;
+const f=t=>t*t-4*t+5;
+function niceStep(span,target){const raw=span/target,p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p;return (m<1.5?1:m<3?2:m<7?5:10)*p}
+function labelPoint(text,px,py,color,W,H){ctx.font="bold 15px sans-serif";const pad=6,tw=ctx.measureText(text).width;let tx=px+10,ty=py-12;if(tx+tw+pad*2>W)tx=px-tw-pad*2-10;if(ty-20<0)ty=py+27;if(ty+8>H)ty=H-10;ctx.fillStyle="rgba(255,255,255,.9)";ctx.fillRect(tx-pad,ty-17,tw+pad*2,23);ctx.fillStyle=color;ctx.fillText(text,tx,ty)}
+function draw(){
+  const l=Math.min(+a.value,+b.value),r=Math.max(+a.value,+b.value);av.textContent=a.value;bv.textContent=b.value;
+  const W=cv.width,H=cv.height;
+  let x0=Math.min(l,2)-1.5,x1=Math.max(r,2)+1.5;if(x1-x0<5){x0-=1;x1+=1}
+  let ymin=Infinity,ymax=-Infinity;for(let k=0;k<=300;k++){const t=x0+(x1-x0)*k/300,v=f(t);ymin=Math.min(ymin,v);ymax=Math.max(ymax,v)}
+  ymin=Math.min(ymin,0);ymax=Math.max(ymax,0);let ypad=Math.max(1.5,(ymax-ymin)*.12);let y0=ymin-ypad,y1=ymax+ypad;
+  const X=t=>(t-x0)/(x1-x0)*W,Y=t=>H-(t-y0)/(y1-y0)*H;
+  ctx.clearRect(0,0,W,H);
+  const xs=niceStep(x1-x0,9),ys=niceStep(y1-y0,8);
+  ctx.strokeStyle="#dbe3ee";ctx.lineWidth=1;
+  for(let v=Math.ceil(x0/xs)*xs;v<=x1+1e-9;v+=xs){if(Math.abs(v)<1e-9)continue;ctx.beginPath();ctx.moveTo(X(v),0);ctx.lineTo(X(v),H);ctx.stroke()}
+  for(let v=Math.ceil(y0/ys)*ys;v<=y1+1e-9;v+=ys){if(Math.abs(v)<1e-9)continue;ctx.beginPath();ctx.moveTo(0,Y(v));ctx.lineTo(W,Y(v));ctx.stroke()}
+  ctx.strokeStyle="#475569";ctx.lineWidth=2.3;
+  if(x0<=0&&0<=x1){ctx.beginPath();ctx.moveTo(X(0),0);ctx.lineTo(X(0),H);ctx.stroke()}
+  if(y0<=0&&0<=y1){ctx.beginPath();ctx.moveTo(0,Y(0));ctx.lineTo(W,Y(0));ctx.stroke()}
+  if(x0<=0&&0<=x1&&y0<=0&&0<=y1){ctx.fillStyle="#475569";ctx.font="13px sans-serif";ctx.fillText("0",X(0)+6,Y(0)+16)}
+  ctx.fillStyle="rgba(37,99,235,.10)";ctx.fillRect(X(l),0,X(r)-X(l),H);
+  ctx.strokeStyle="#2563eb";ctx.lineWidth=4;ctx.beginPath();for(let p=0;p<=W;p++){const t=x0+(x1-x0)*p/W,yy=Y(f(t));if(p===0)ctx.moveTo(p,yy);else ctx.lineTo(p,yy)}ctx.stroke();
+  const candidates=[["左端",l,f(l)],["右端",r,f(r)]];if(l<=2&&2<=r)candidates.push(["頂点",2,f(2)]);
+  candidates.forEach(q=>{const color=q[0]==="頂点"?"#dc2626":"#047857",px=X(q[1]),py=Y(q[2]);ctx.fillStyle=color;ctx.beginPath();ctx.arc(px,py,7,0,Math.PI*2);ctx.fill();labelPoint(q[0]+" ("+q[1]+", "+q[2]+")",px,py,color,W,H)});
+  if(show){const mn=candidates.reduce((u,v)=>v[2]<u[2]?v:u),mx=candidates.reduce((u,v)=>v[2]>u[2]?v:u);res.innerHTML=candidates.map(q=>q[0]+"："+q[2]).join("、")+"<br><b>最小値 "+mn[2]+"（"+mn[0]+"）／最大値 "+mx[2]+"（"+mx[0]+"）</b>"}else{res.textContent="まず、頂点と定義域の両端の値を比べてみましょう。"}
+}
+[a,b].forEach(el=>el.addEventListener("input",draw));ans.addEventListener("click",()=>{show=!show;ans.textContent=show?"答えを隠す":"答えを確認";draw()});draw();
+</script>
+</body>
+</html>
