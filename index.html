@@ -338,6 +338,7 @@ async function initialize(){
     }
     await loadCatalogFromWeb();
     await startLibrary();
+    hideLoadPanel();
   }catch(error){
     showLoadPanel(
       "教材フォルダを選択してください",
