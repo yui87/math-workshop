@@ -49,7 +49,6 @@ textarea{resize:vertical;line-height:1.5}
 .head .desc{display:none;margin:10px 0 0;color:var(--m);line-height:1.65;white-space:pre-wrap}
 .head.details-open .desc{display:block}
 .head-actions{display:flex;gap:6px;flex-shrink:0}
-.guide{display:none}
 
 .tabs{display:flex;gap:5px;padding:7px 8px 0;border-bottom:1px solid var(--l);overflow:auto}
 .tab{border:0;background:transparent;padding:8px 12px;font-weight:800;color:var(--m);white-space:nowrap}
@@ -140,7 +139,7 @@ body.runner-focus #p-run .warn{display:none}
 </style>
 </head>
 <body>
-<header class="top"><div class="topin"><div><h1>動く数学教材工房</h1><p>教材は外部JSONと個別HTMLから読み込みます。選択時に自動実行されます。</p></div><div class="actions"><span class="source-status" id="sourceStatus">教材を読み込み中…</span><button class="btn sm" id="chooseFolderBtn" type="button" hidden>教材フォルダを選ぶ</button><input id="folderPicker" type="file" webkitdirectory multiple hidden></div></div></header>
+<header class="top"><div class="topin"><div><h1>動く数学教材工房</h1><p>教材を選んで「実行結果」をすぐ試せます。「コード」タブでは、LLM（ChatGPT・Claude・Geminiなど）に自分の問題に合わせて改変してもらったHTMLを貼り付けて実行できます。このサイト自体もLLMを活用して開発しています。</p></div><div class="actions"><span class="source-status" id="sourceStatus">教材を読み込み中…</span><button class="btn sm" id="chooseFolderBtn" type="button" hidden>教材フォルダを選ぶ</button><input id="folderPicker" type="file" webkitdirectory multiple hidden></div></div></header>
 
 <section class="load-panel" id="loadPanel" hidden><div><strong id="loadTitle">教材を読み込めませんでした</strong><p id="loadMessage">このHTMLをダブルクリックで開いた場合は、下のボタンからこのプロジェクトフォルダ全体を選択してください。</p></div><button class="btn blue" id="loadFolderBtn" type="button">プロジェクトフォルダを選択</button></section>
 <div class="layout">
